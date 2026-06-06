@@ -2,14 +2,21 @@ from pathlib import Path
 
 from app.llm.groq_client import get_llm
 from app.prompts.rag_prompt import RAG_PROMPT
-from app.retrieval.retriever import get_retriever
+from app.retrieval.retriever import retrieve_documents
 
 
 def answer_question(question: str):
 
-    retriever = get_retriever()
+    documents = retrieve_documents(question)
 
-    documents = retriever.invoke(question)
+    if not documents:
+        return {
+            "answer": (
+                "I couldn't find relevant information "
+                "in the provided documents."
+            ),
+            "sources": []
+        }
 
     context = "\n\n".join(
         doc.page_content for doc in documents
@@ -28,20 +35,25 @@ def answer_question(question: str):
 
     sources = []
 
+    seen = set()
+
     for doc in documents:
 
-        source_name = Path(
-            doc.metadata["source"]
-        ).name
+        source_name = Path(doc.metadata["source"]).name
 
         page_number = doc.metadata["page"] + 1
 
-        sources.append(
-            {
-                "source": source_name,
-                "page": page_number
-            }
-        )
+        key = (source_name, page_number)
+
+        if key not in seen:
+            seen.add(key)
+
+            sources.append(
+                {
+                    "source": source_name,
+                    "page": page_number
+                }
+            )
 
     return {
         "answer": response.content,

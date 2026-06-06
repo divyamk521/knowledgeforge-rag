@@ -1,19 +1,24 @@
 from app.ingestion.vector_store import load_vector_store
 
 
-def get_retriever():
-    """
-    Create MMR retriever.
-    """
+SIMILARITY_THRESHOLD = 0.7
+
+
+def retrieve_documents(question: str):
 
     vector_store = load_vector_store()
 
-    retriever = vector_store.as_retriever(
-        search_type="mmr",
-        search_kwargs={
-            "k": 5,
-            "fetch_k": 20,
-        }
+    results = vector_store.similarity_search_with_score(
+        question,
+        k=5
     )
 
-    return retriever
+    filtered_docs = []
+
+    for doc, score in results:
+
+        # Lower score = better similarity in Chroma
+        if score < SIMILARITY_THRESHOLD:
+            filtered_docs.append(doc)
+
+    return filtered_docs
