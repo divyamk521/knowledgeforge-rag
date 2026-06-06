@@ -30,5 +30,10 @@ class Settings:
         os.getenv("CHUNK_OVERLAP", 200)
     )
 
+    COLLECTION_NAME = os.getenv(
+        "COLLECTION_NAME",
+        "knowledgeforge"
+    )
+
 
 settings = Settings()
