@@ -1,7 +1,3 @@
-import shutil
-from pathlib import Path
-
-from app.core.config import settings
 from app.ingestion.loader import load_documents
 from app.ingestion.chunker import split_documents
 from app.ingestion.vector_store import create_vector_store
@@ -9,12 +5,10 @@ from app.ingestion.vector_store import create_vector_store
 
 def index_documents():
 
-    chroma_path = Path(settings.CHROMA_DB_PATH)
-
-    if chroma_path.exists():
-        shutil.rmtree(chroma_path)
-
     documents = load_documents()
+
+    if not documents:
+        raise ValueError("No documents found.")
 
     chunks = split_documents(documents)
 
