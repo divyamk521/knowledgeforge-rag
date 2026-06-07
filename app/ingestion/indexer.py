@@ -8,10 +8,14 @@ def index_documents():
     documents = load_documents()
 
     if not documents:
-        raise ValueError("No documents found.")
+        raise ValueError(
+            "No PDF documents found."
+        )
 
     chunks = split_documents(documents)
 
     create_vector_store(chunks)
 
-    print("Indexing completed successfully.")
+    print(
+        f"Indexed {len(chunks)} chunks successfully."
+    )

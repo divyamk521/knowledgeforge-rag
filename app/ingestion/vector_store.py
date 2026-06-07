@@ -1,3 +1,4 @@
+from chromadb import PersistentClient
 from langchain_chroma import Chroma
 
 from app.core.config import settings
@@ -6,14 +7,25 @@ from app.ingestion.embedder import get_embedding_model
 
 def create_vector_store(chunks):
     """
-    Create vector database and persist embeddings.
+    Recreate collection and store embeddings.
     """
 
     embeddings = get_embedding_model()
 
+    client = PersistentClient(
+        path=settings.CHROMA_DB_PATH
+    )
+
+    try:
+        client.delete_collection(
+            settings.COLLECTION_NAME
+        )
+    except Exception:
+        pass
+
     vector_store = Chroma(
+        client=client,
         collection_name=settings.COLLECTION_NAME,
-        persist_directory=settings.CHROMA_DB_PATH,
         embedding_function=embeddings,
     )
 
@@ -24,14 +36,18 @@ def create_vector_store(chunks):
 
 def load_vector_store():
     """
-    Load existing vector database.
+    Load existing collection.
     """
 
     embeddings = get_embedding_model()
 
+    client = PersistentClient(
+        path=settings.CHROMA_DB_PATH
+    )
+
     vector_store = Chroma(
+        client=client,
         collection_name=settings.COLLECTION_NAME,
-        persist_directory=settings.CHROMA_DB_PATH,
         embedding_function=embeddings,
     )
 
