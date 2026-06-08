@@ -5,7 +5,7 @@ from app.prompts.rag_prompt import RAG_PROMPT
 from app.retrieval.retriever import retrieve_documents
 
 
-def answer_question(question: str):
+def answer_question(question: str, chat_history: str = ""):
 
     documents = retrieve_documents(question)
 
@@ -19,13 +19,15 @@ def answer_question(question: str):
         }
 
     context = "\n\n".join(
-        doc.page_content for doc in documents
+        doc.page_content
+        for doc in documents
     )
 
     llm = get_llm()
 
     prompt = RAG_PROMPT.invoke(
         {
+            "chat_history": chat_history,
             "context": context,
             "question": question
         }
@@ -39,13 +41,16 @@ def answer_question(question: str):
 
     for doc in documents:
 
-        source_name = Path(doc.metadata["source"]).name
+        source_name = Path(
+            doc.metadata["source"]
+        ).name
 
         page_number = doc.metadata["page"] + 1
 
         key = (source_name, page_number)
 
         if key not in seen:
+
             seen.add(key)
 
             sources.append(

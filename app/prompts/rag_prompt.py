@@ -5,13 +5,14 @@ RAG_PROMPT = ChatPromptTemplate.from_template(
     """
 You are a helpful AI assistant.
 
-Answer ONLY using the provided context.
+Use ONLY the provided context and chat history.
 
 If the answer is not present in the context, say:
 
 "I couldn't find that information in the provided documents."
 
-Do not use your own knowledge.
+Chat History:
+{chat_history}
 
 Context:
 {context}

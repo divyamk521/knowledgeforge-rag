@@ -13,10 +13,14 @@ from app.chains.rag_chain import answer_question
 
 st.set_page_config(
     page_title="KnowledgeForge",
-    page_icon="📚"
+    page_icon="📚",
+    layout="wide"
 )
 
 st.title("📚 KnowledgeForge")
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
 st.subheader("Upload Documents")
 
@@ -40,32 +44,44 @@ if uploaded_file:
     )
 
     with st.spinner("Indexing documents..."):
-
         index_documents()
 
     st.success("Documents indexed successfully.")
 
 st.divider()
 
-question = st.text_input(
-    "Ask a question about your documents"
+for message in st.session_state.messages:
+
+    with st.chat_message(message["role"]):
+        st.write(message["content"])
+
+question = st.chat_input(
+    "Ask about your documents..."
 )
 
-if st.button("Ask"):
+if question:
 
-    if question:
+    with st.chat_message("user"):
+        st.write(question)
 
-        with st.spinner("Generating answer..."):
+    chat_history = "\n".join(
+        [
+            f"{msg['role']}: {msg['content']}"
+            for msg in st.session_state.messages
+        ]
+    )
 
-            result = answer_question(question)
+    result = answer_question(
+        question=question,
+        chat_history=chat_history
+    )
 
-        st.subheader("Answer")
-
+    with st.chat_message("assistant"):
         st.write(result["answer"])
 
         if result["sources"]:
 
-            st.subheader("Sources")
+            st.markdown("**Sources:**")
 
             for source in result["sources"]:
 
@@ -73,3 +89,17 @@ if st.button("Ask"):
                     f"• {source['source']} "
                     f"(page {source['page']})"
                 )
+
+    st.session_state.messages.append(
+        {
+            "role": "user",
+            "content": question
+        }
+    )
+
+    st.session_state.messages.append(
+        {
+            "role": "assistant",
+            "content": result["answer"]
+        }
+    )
