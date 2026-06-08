@@ -3,11 +3,22 @@ from pathlib import Path
 from app.llm.groq_client import get_llm
 from app.prompts.rag_prompt import RAG_PROMPT
 from app.retrieval.retriever import retrieve_documents
+from app.chains.question_rewriter import rewrite_question
 
 
-def answer_question(question: str, chat_history: str = ""):
+def answer_question(
+    question: str,
+    chat_history: str = ""
+):
 
-    documents = retrieve_documents(question)
+    standalone_question = rewrite_question(
+        question=question,
+        chat_history=chat_history
+    )
+
+    documents = retrieve_documents(
+        standalone_question
+    )
 
     if not documents:
         return {
@@ -15,7 +26,8 @@ def answer_question(question: str, chat_history: str = ""):
                 "I couldn't find relevant information "
                 "in the provided documents."
             ),
-            "sources": []
+            "sources": [],
+            "rewritten_question": standalone_question
         }
 
     context = "\n\n".join(
@@ -29,7 +41,7 @@ def answer_question(question: str, chat_history: str = ""):
         {
             "chat_history": chat_history,
             "context": context,
-            "question": question
+            "question": standalone_question
         }
     )
 
@@ -47,7 +59,10 @@ def answer_question(question: str, chat_history: str = ""):
 
         page_number = doc.metadata["page"] + 1
 
-        key = (source_name, page_number)
+        key = (
+            source_name,
+            page_number
+        )
 
         if key not in seen:
 
@@ -62,5 +77,6 @@ def answer_question(question: str, chat_history: str = ""):
 
     return {
         "answer": response.content,
-        "sources": sources
+        "sources": sources,
+        "rewritten_question": standalone_question
     }
