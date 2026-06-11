@@ -11,6 +11,7 @@ from app.ingestion.indexer import index_documents
 from app.chains.rag_chain import answer_question
 
 
+
 st.set_page_config(
     page_title="KnowledgeForge",
     page_icon="📚",

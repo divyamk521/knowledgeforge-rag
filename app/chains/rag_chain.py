@@ -4,6 +4,7 @@ from app.llm.groq_client import get_llm
 from app.prompts.rag_prompt import RAG_PROMPT
 from app.retrieval.retriever import retrieve_documents
 from app.chains.question_rewriter import rewrite_question
+from app.utils.logger import log_query
 
 
 def answer_question(
@@ -21,7 +22,8 @@ def answer_question(
     )
 
     if not documents:
-        return {
+
+        result = {
             "answer": (
                 "I couldn't find relevant information "
                 "in the provided documents."
@@ -29,6 +31,15 @@ def answer_question(
             "sources": [],
             "rewritten_question": standalone_question
         }
+
+        log_query(
+            question,
+            standalone_question,
+            result["answer"],
+            result["sources"]
+        )
+
+        return result
 
     context = "\n\n".join(
         doc.page_content
@@ -75,8 +86,17 @@ def answer_question(
                 }
             )
 
-    return {
+    result = {
         "answer": response.content,
         "sources": sources,
         "rewritten_question": standalone_question
     }
+
+    log_query(
+        question,
+        standalone_question,
+        result["answer"],
+        result["sources"]
+    )
+
+    return result
