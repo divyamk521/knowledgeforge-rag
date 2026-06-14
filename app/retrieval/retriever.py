@@ -1,24 +1,27 @@
 from app.ingestion.vector_store import load_vector_store
+from app.retrieval.reranker import rerank_documents
 
 
-SIMILARITY_THRESHOLD = 0.7
-
-
-def retrieve_documents(question: str):
+def retrieve_documents(
+    question: str
+):
 
     vector_store = load_vector_store()
 
-    results = vector_store.similarity_search_with_score(
-        question,
-        k=5
+    retriever = vector_store.as_retriever(
+        search_type="mmr",
+        search_kwargs={
+            "k": 20,
+            "fetch_k": 30
+        }
     )
 
-    filtered_docs = []
+    documents = retriever.invoke(question)
 
-    for doc, score in results:
+    reranked_documents = rerank_documents(
+        question=question,
+        documents=documents,
+        top_k=5
+    )
 
-        # Lower score = better similarity in Chroma
-        if score < SIMILARITY_THRESHOLD:
-            filtered_docs.append(doc)
-
-    return filtered_docs
+    return reranked_documents
