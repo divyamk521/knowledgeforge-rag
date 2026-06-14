@@ -17,6 +17,10 @@ def answer_question(
         chat_history=chat_history
     )
 
+    print("\n========== STANDALONE QUESTION ==========")
+    print(standalone_question)
+    print("=========================================\n")
+
     documents = retrieve_documents(
         standalone_question
     )
@@ -65,8 +69,7 @@ def answer_question(
     for doc in documents:
 
         source_name = Path(
-            doc.metadata["source"]
-        ).name
+            doc.metadata["source"]).name
 
         page_number = doc.metadata["page"] + 1
 

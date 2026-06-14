@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from chromadb import PersistentClient
 from langchain_chroma import Chroma
 
@@ -6,9 +8,6 @@ from app.ingestion.embedder import get_embedding_model
 
 
 def create_vector_store(chunks):
-    """
-    Recreate collection and store embeddings.
-    """
 
     embeddings = get_embedding_model()
 
@@ -31,13 +30,13 @@ def create_vector_store(chunks):
 
     vector_store.add_documents(chunks)
 
+    load_vector_store.cache_clear()
+
     return vector_store
 
 
+@lru_cache(maxsize=1)
 def load_vector_store():
-    """
-    Load existing collection.
-    """
 
     embeddings = get_embedding_model()
 
@@ -50,5 +49,7 @@ def load_vector_store():
         collection_name=settings.COLLECTION_NAME,
         embedding_function=embeddings,
     )
+
+    print("Vector store loaded.")
 
     return vector_store

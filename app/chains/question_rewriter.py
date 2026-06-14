@@ -1,3 +1,5 @@
+from urllib import response
+
 from app.llm.groq_client import get_llm
 from app.prompts.rewrite_prompt import REWRITE_PROMPT
 
@@ -20,5 +22,10 @@ def rewrite_question(
     )
 
     response = llm.invoke(prompt)
+    print("\n========== QUESTION REWRITE ==========")
+    print("Original:", question)
+    print("History:", chat_history)
+    print("Rewritten:", response.content)
+    print("=====================================\n")
 
     return response.content.strip()

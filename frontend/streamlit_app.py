@@ -11,7 +11,6 @@ from app.ingestion.indexer import index_documents
 from app.chains.rag_chain import answer_question
 
 
-
 st.set_page_config(
     page_title="KnowledgeForge",
     page_icon="📚",
@@ -65,12 +64,19 @@ if question:
     with st.chat_message("user"):
         st.write(question)
 
+    # Use only last 3 exchanges (6 messages)
+    recent_messages = st.session_state.messages[-6:]
+
     chat_history = "\n".join(
         [
             f"{msg['role']}: {msg['content']}"
-            for msg in st.session_state.messages
+            for msg in recent_messages
         ]
     )
+
+    print("\n========== CHAT HISTORY ==========")
+    print(chat_history)
+    print("==================================\n")
 
     result = answer_question(
         question=question,
