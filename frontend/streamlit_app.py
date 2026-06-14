@@ -22,6 +22,10 @@ st.title("📚 KnowledgeForge")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+if "documents_indexed" not in st.session_state:
+    st.session_state.documents_indexed = False
+
+
 st.subheader("Upload Documents")
 
 uploaded_file = st.file_uploader(
@@ -29,7 +33,7 @@ uploaded_file = st.file_uploader(
     type=["pdf"]
 )
 
-if uploaded_file:
+if uploaded_file and not st.session_state.documents_indexed:
 
     save_path = (
         Path(settings.RAW_DATA_PATH)
@@ -45,6 +49,8 @@ if uploaded_file:
 
     with st.spinner("Indexing documents..."):
         index_documents()
+
+    st.session_state.documents_indexed = True
 
     st.success("Documents indexed successfully.")
 
@@ -64,7 +70,6 @@ if question:
     with st.chat_message("user"):
         st.write(question)
 
-    # Use only last 3 exchanges (6 messages)
     recent_messages = st.session_state.messages[-6:]
 
     chat_history = "\n".join(
@@ -74,16 +79,13 @@ if question:
         ]
     )
 
-    print("\n========== CHAT HISTORY ==========")
-    print(chat_history)
-    print("==================================\n")
-
     result = answer_question(
         question=question,
         chat_history=chat_history
     )
 
     with st.chat_message("assistant"):
+
         st.write(result["answer"])
 
         if result["sources"]:
