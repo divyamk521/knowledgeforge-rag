@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 
 from app.llm.groq_client import get_llm
@@ -12,6 +13,8 @@ def answer_question(
     chat_history: str = ""
 ):
 
+    start_time = time.time()
+
     standalone_question = rewrite_question(
         question=question,
         chat_history=chat_history
@@ -23,6 +26,11 @@ def answer_question(
 
     if not documents:
 
+        response_time = round(
+            time.time() - start_time,
+            2
+        )
+
         result = {
             "answer": (
                 "I couldn't find relevant information "
@@ -30,7 +38,8 @@ def answer_question(
             ),
             "sources": [],
             "rewritten_question": standalone_question,
-            "confidence_score": 0
+            "confidence_score": 0,
+            "response_time": response_time
         }
 
         log_query(
@@ -92,11 +101,17 @@ def answer_question(
         100
     )
 
+    response_time = round(
+        time.time() - start_time,
+        2
+    )
+
     result = {
         "answer": response.content,
         "sources": sources,
         "rewritten_question": standalone_question,
-        "confidence_score": confidence_percentage
+        "confidence_score": confidence_percentage,
+        "response_time": response_time
     }
 
     log_query(

@@ -88,10 +88,19 @@ if question:
 
         st.write(result["answer"])
 
-        st.metric(
-            label="Confidence",
-            value=f"{result['confidence_score']}%"
-        )
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.metric(
+                label="Confidence",
+                value=f"{result['confidence_score']}%"
+            )
+
+        with col2:
+            st.metric(
+                label="Response Time",
+                value=f"{result['response_time']} sec"
+            )
 
         if result["sources"]:
 
