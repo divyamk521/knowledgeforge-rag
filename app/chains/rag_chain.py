@@ -17,11 +17,7 @@ def answer_question(
         chat_history=chat_history
     )
 
-    print("\n========== STANDALONE QUESTION ==========")
-    print(standalone_question)
-    print("=========================================\n")
-
-    documents = retrieve_documents(
+    documents, confidence_score = retrieve_documents(
         standalone_question
     )
 
@@ -33,7 +29,8 @@ def answer_question(
                 "in the provided documents."
             ),
             "sources": [],
-            "rewritten_question": standalone_question
+            "rewritten_question": standalone_question,
+            "confidence_score": 0
         }
 
         log_query(
@@ -69,7 +66,8 @@ def answer_question(
     for doc in documents:
 
         source_name = Path(
-            doc.metadata["source"]).name
+            doc.metadata["source"]
+        ).name
 
         page_number = doc.metadata["page"] + 1
 
@@ -89,10 +87,16 @@ def answer_question(
                 }
             )
 
+    confidence_percentage = min(
+        round(confidence_score * 10),
+        100
+    )
+
     result = {
         "answer": response.content,
         "sources": sources,
-        "rewritten_question": standalone_question
+        "rewritten_question": standalone_question,
+        "confidence_score": confidence_percentage
     }
 
     log_query(

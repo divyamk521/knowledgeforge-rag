@@ -45,10 +45,12 @@ def retrieve_documents(
 
             unique_documents.append(doc)
 
-    reranked_documents = rerank_documents(
-        question=question,
-        documents=unique_documents,
-        top_k=5
+    reranked_documents, confidence_score = (
+        rerank_documents(
+            question=question,
+            documents=unique_documents,
+            top_k=5
+        )
     )
 
-    return reranked_documents
+    return reranked_documents, confidence_score

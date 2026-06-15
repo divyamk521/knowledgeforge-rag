@@ -22,7 +22,7 @@ def rerank_documents(
 ):
 
     if not documents:
-        return []
+        return [], 0
 
     reranker = get_reranker()
 
@@ -47,4 +47,8 @@ def rerank_documents(
         for doc, score in scored_docs[:top_k]
     ]
 
-    return top_documents
+    best_score = float(
+        scored_docs[0][1]
+    )
+
+    return top_documents, best_score

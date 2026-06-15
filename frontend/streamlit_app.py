@@ -88,6 +88,11 @@ if question:
 
         st.write(result["answer"])
 
+        st.metric(
+            label="Confidence",
+            value=f"{result['confidence_score']}%"
+        )
+
         if result["sources"]:
 
             st.markdown("**Sources:**")
